@@ -5,23 +5,19 @@
   #define _WIN32_WINNT 0x400
   #include "windows.h"
 
-  //#pragma data_seg(".GLOBALS")
   PyObject* callback_funcs[WH_MAX];
   HHOOK hHooks[WH_MAX];
-  PyInterpreterState *save_interp = NULL;
-  //#pragma data_seg()
 %}
 
 %typemap(python, in) PyObject *pyfunc {
   if (!PyCallable_Check($input)) {
-    PyErr_SetString(PyExc_TypeError, "Need a callable object!");
+    PyErr_SetString(PyExc_TypeError, "Need a callable object");
     return NULL;
   }
   $1 = $input;
 }
 
-%init %{  save_interp = PyThreadState_Get()->interp;
-
+%init %{
   //set the arrays to NULL
   for(i=0; i < WH_MAX; i++) {
     callback_funcs[i] = NULL;
@@ -32,60 +28,69 @@
 %wrapper %{
   LRESULT CALLBACK cLLKeyboardCallback(int code, WPARAM wParam, LPARAM lParam) {
     PyObject *arglist, *r;
-    PyThreadState *prev_state, *new_state;
-    PKBDLLHOOKSTRUCT kbd;    HWND hwnd;
+    PKBDLLHOOKSTRUCT kbd;
+    HWND hwnd;
     PSTR win_name = NULL;
     static int win_len;
     static long result;
+    long pass = 1;
+    PyGILState_STATE gil;
+    
+    // get the GIL
+    gil = PyGILState_Ensure();
 
-
+    // cast to a keyboard event struct
     kbd = (PKBDLLHOOKSTRUCT)lParam;
+    // get the current foreground window (might not be the real window that received the event)
     hwnd = GetForegroundWindow();
 
-    //grab the window name if possible
+    // grab the window name if possible
     win_len = GetWindowTextLength(hwnd);
     if(win_len > 0) {
       win_name = (PSTR) malloc(sizeof(char) * win_len + 1);
       GetWindowText(hwnd, win_name, win_len + 1);
     }
 
-    //pass the message on to the Python function
-    PyEval_AcquireLock();
-    new_state = PyThreadState_New(save_interp);
-    prev_state = PyThreadState_Swap(new_state);
-
+    // pass the message on to the Python function
     arglist = Py_BuildValue("(iiiiiiz)", wParam, kbd->vkCode, kbd->scanCode,
                             kbd->flags, kbd->time, hwnd, win_name);
-    r = PyEval_CallObject(callback_funcs[WH_KEYBOARD_LL], arglist);
+    r = PyObject_CallObject(callback_funcs[WH_KEYBOARD_LL], arglist);
 
-    if(r == NULL) {
+    // check if we should pass the event on or not
+    if(r == NULL)
       PyErr_Print();
-    }
+    else
+      pass = PyInt_AsLong(r);
 
     Py_XDECREF(r);
     Py_DECREF(arglist);
+    // release the GIL
+    PyGILState_Release(gil);
 
-    new_state = PyThreadState_Swap(prev_state);
-    PyThreadState_Clear(new_state);
-    PyEval_ReleaseLock();
-    PyThreadState_Delete(new_state);
-
-    //free the memory for the window name
+    // free the memory for the window name
     if(win_name != NULL)
       free(win_name);
-    //now pass the message onto the next hook in Windows
-    result = CallNextHookEx(hHooks[WH_KEYBOARD_LL], code, wParam, lParam);
-
+      
+    // decide whether or not to call the next hook
+    if(code <  0 || pass)
+      result = CallNextHookEx(hHooks[WH_KEYBOARD_LL], code, wParam, lParam);
+    else
+      result = 42;
     return result;
   }
 
   LRESULT CALLBACK cLLMouseCallback(int code, WPARAM wParam, LPARAM lParam) {
     PyObject *arglist, *r;
-    PyThreadState *prev_state, *new_state;
-    PMSLLHOOKSTRUCT ms;    HWND hwnd;
+    PMSLLHOOKSTRUCT ms;
+    HWND hwnd;
     PSTR win_name = NULL;
     static int win_len;
     static long result;
+    long pass = 1;    
+    PyGILState_STATE gil;
+    
+    // get the GIL
+    gil = PyGILState_Ensure();    
 
     //pass the message on to the Python function
     ms = (PMSLLHOOKSTRUCT)lParam;
@@ -98,33 +103,31 @@
       GetWindowText(hwnd, win_name, win_len + 1);
     }
 
-    PyEval_AcquireLock();
-    new_state = PyThreadState_New(save_interp);
-    prev_state = PyThreadState_Swap(new_state);
-
     //build the argument list to the callback function
     arglist = Py_BuildValue("(iiiiiiiz)", wParam, ms->pt.x, ms->pt.y, ms->mouseData,
                             ms->flags, ms->time, hwnd, win_name);
-    r = PyEval_CallObject(callback_funcs[WH_MOUSE_LL], arglist);
-
-    if(r == NULL) {
+    r = PyObject_CallObject(callback_funcs[WH_MOUSE_LL], arglist);
+    
+    // check if we should pass the event on or not
+    if(r == NULL)
       PyErr_Print();
-    }
+    else
+      pass = PyInt_AsLong(r);
 
     Py_XDECREF(r);
     Py_DECREF(arglist);
+    // release the GIL
+    PyGILState_Release(gil);    
 
-    new_state = PyThreadState_Swap(prev_state);
-    PyThreadState_Clear(new_state);
-    PyEval_ReleaseLock();
-    PyThreadState_Delete(new_state);
     //free the memory for the window name
     if(win_name != NULL)
       free(win_name);
-
-    //now pass the message onto the next hook in Windows
-    result = CallNextHookEx(hHooks[WH_MOUSE_LL], code, wParam, lParam);
-
+      
+    // decide whether or not to call the next hook
+    if(code < 0 || pass)
+      result = CallNextHookEx(hHooks[WH_MOUSE_LL], code, wParam, lParam);
+    else
+      result = 42;
     return result;
   }
 

@@ -250,7 +250,9 @@ class HookManager(object):
     event = MouseEvent(msg, x, y, data, flags, time, hwnd, window_name)
     func = self.mouse_funcs.get(msg)
     if func:
-      func(event)
+      return func(event)
+    else:
+      return True
 
   def KeyboardSwitch(self, msg, vk_code, scan_code, flags, time, hwnd, win_name):
     '''Pass a keyboard event on to the appropriate handler if one is registered.
@@ -272,7 +274,9 @@ class HookManager(object):
     event = KeyboardEvent(msg, vk_code, scan_code, flags, time, hwnd, win_name)
     func = self.keyboard_funcs.get(msg)
     if func:
-      func(event)
+      return func(event)
+    else:
+      return True
 
   def SubscribeMouseMove(self, func):
     if func is None:

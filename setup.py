@@ -23,7 +23,7 @@ libs = ['user32']
 doclines = __doc__.split('\n')
 
 setup(name='pyHook', 
-      version='1.2',
+      version='1.3',
       author='Peter Parente',
       author_email='parente@cs.unc.edu',
       url='http://www.cs.unc.edu/~parente',
@@ -34,6 +34,7 @@ setup(name='pyHook',
       classifiers = filter(None, classifiers.split('\n')),
       long_description = ' '.join(doclines[2:]),
       packages = ['pyHook'],
-      ext_modules = [Extension('pyHook._cpyHook', ['pyHook/cpyHook.i'], libraries=libs)],
-      data_files=[('Lib/site-packages/pyHook', ['pyHook/LICENSE.txt'])]
+      package_dir = {'pyHook' : ""},
+      ext_modules = [Extension('pyHook._cpyHook', ['cpyHook.i'], libraries=libs)],
+      data_files=[('Lib/site-packages/pyHook', ['LICENSE.txt'])]
       )

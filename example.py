@@ -1,14 +1,17 @@
 import wx
-from pyHook.HookManager import *
+import pyHook
 
 class myFrame(wx.Frame):
   def __init__(self):
     wx.Frame.__init__(self, None, -1, 'My Frame')
 
-    self.hm = HookManager()
+    # create the hook mananger
+    self.hm = pyHook.HookManager()
+    # register two callbacks
     self.hm.MouseAllButtonsDown = self.OnMouseEvent
     self.hm.KeyDown = self.OnKeyboardEvent
 
+    # hook into the mouse and keyboard events
     self.hm.HookMouse()
     self.hm.HookKeyboard()
 
@@ -24,6 +27,10 @@ class myFrame(wx.Frame):
     print 'Wheel:',event.Wheel
     print 'Injected:',event.Injected
     print '---'
+    
+    # return True to pass the event to other handlers
+    # return False to stop the event from propagating
+    return True
 
   def OnKeyboardEvent(self, event):
     print 'MessageName:',event.MessageName
@@ -39,6 +46,10 @@ class myFrame(wx.Frame):
     print 'Alt', event.Alt
     print 'Transition', event.Transition
     print '---'
+    
+    # return True to pass the event to other handlers
+    # return False to stop the event from propagating    
+    return True
 
   def OnClose(self, event):
     del self.hm
