@@ -174,7 +174,7 @@ class MouseEvent(HookEvent):
   
   @ivar Position: Location of the mouse event on the screen
   @type Position: 2-tuple of integer
-  @ivar Wheel: Wheel event data
+  @ivar Wheel: Positive if the wheel scrolls up, negative if down, zero otherwise
   @type Wheel: integer
   @ivar Injected: Was this event generated programmatically?
   @type Injected: boolean
