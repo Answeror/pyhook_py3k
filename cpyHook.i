@@ -35,7 +35,7 @@
     static long result;
     long pass = 1;
     PyGILState_STATE gil;
-    
+
     // get the GIL
     gil = PyGILState_Ensure();
 
@@ -70,7 +70,7 @@
     // free the memory for the window name
     if(win_name != NULL)
       free(win_name);
-      
+
     // decide whether or not to call the next hook
     if(code <  0 || pass)
       result = CallNextHookEx(hHooks[WH_KEYBOARD_LL], code, wParam, lParam);
@@ -86,11 +86,11 @@
     PSTR win_name = NULL;
     static int win_len;
     static long result;
-    long pass = 1;    
+    long pass = 1;
     PyGILState_STATE gil;
-    
+
     // get the GIL
-    gil = PyGILState_Ensure();    
+    gil = PyGILState_Ensure();
 
     //pass the message on to the Python function
     ms = (PMSLLHOOKSTRUCT)lParam;
@@ -107,7 +107,7 @@
     arglist = Py_BuildValue("(iiiiiiiz)", wParam, ms->pt.x, ms->pt.y, ms->mouseData,
                             ms->flags, ms->time, hwnd, win_name);
     r = PyObject_CallObject(callback_funcs[WH_MOUSE_LL], arglist);
-    
+
     // check if we should pass the event on or not
     if(r == NULL)
       PyErr_Print();
@@ -117,12 +117,12 @@
     Py_XDECREF(r);
     Py_DECREF(arglist);
     // release the GIL
-    PyGILState_Release(gil);    
+    PyGILState_Release(gil);
 
     //free the memory for the window name
     if(win_name != NULL)
       free(win_name);
-      
+
     // decide whether or not to call the next hook
     if(code < 0 || pass)
       result = CallNextHookEx(hHooks[WH_MOUSE_LL], code, wParam, lParam);
@@ -175,7 +175,7 @@
     }
 
     if(!hHooks[idHook]) {
-      PyErr_SetString(PyExc_TypeError, "Hooking error: could not set hook");
+      PyErr_SetString(PyExc_TypeError, "Could not set hook");
     }
 
     return 1;
@@ -186,7 +186,7 @@
 
     //make sure we have a valid hook number
     if(idHook > WH_MAX || idHook < WH_MIN) {
-      PyErr_SetString(PyExc_ValueError, "Hooking error: invalid hook ID");
+      PyErr_SetString(PyExc_ValueError, "Invalid hook ID");
     }
 
     //unhook the callback
@@ -202,7 +202,29 @@
 
     return result;
   }
+
+  WORD GetAsciiChar(unsigned int keycode, unsigned int scancode) {
+    WORD c;
+    PBYTE state[256];
+
+    Py_BEGIN_ALLOW_THREADS
+    r = GetKeyboardState(state);
+    Py_END_ALLOW_THREADS
+    if(r == 0) {
+      PyErr_SetString(PyExc_ValueError, "Could not get keyboard state");
+      return 0;
+    }
+    Py_BEGIN_ALLOW_THREADS
+    r = ToAscii(keycode, scancode, state, &c, 0)
+    Py_END_ALLOW_THREADS
+    if(r < 0) {
+      PyErr_SetString(PyExc_ValueError, "Could not convert to ASCII");
+      return 0;
+    }
+    return c;
+  }
 %}
 
+WORD GetAsciiChar(unsigned int keycode, unsigned int scancode);
 int cSetHook(int idHook, PyObject *pyfunc);
 int cUnhook(int idHook);

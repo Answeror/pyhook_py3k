@@ -169,6 +169,8 @@ class KeyboardEvent(HookEvent):
     self.scan_code = scan_code
     self.flags = flags
 
+  def GetCharacter(self):
+    return GetAsciiCharacter(self.vk_code, self.scan_code)
   def GetKey(self):
     return HookConstants.IDToName(self.vk_code)
   def GetKeyID(self):
@@ -191,6 +193,7 @@ class KeyboardEvent(HookEvent):
   Injected = property(fget=IsInjected)
   Alt = property(fget=IsAlt)
   Transition = property(fget=IsTransition)
+  Char = property(fget=GetCharacter)
 
 class HookManager(object):
   def __init__(self):
