@@ -343,7 +343,7 @@ class HookManager(object):
   def SubscribeMouseAll(self, func):
     self.MouseMove = func
     self.MouseWheel = func
-    self.SubscribeAllMouseButtons(func)
+    self.SubscribeMouseAllButtons(func)
 
   def SubscribeMouseAllButtons(self, func):
     self.SubscribeMouseAllButtonsDown(func)
