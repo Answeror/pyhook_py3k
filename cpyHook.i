@@ -22,10 +22,18 @@
   memset(key_state, 0, 256);
   memset(callback_funcs, 0, WH_MAX);
   memset(hHooks, 0, WH_MAX);
+  
+  // get initial key state
+  Py_BEGIN_ALLOW_THREADS
+	key_state[VK_NUMLOCK] = (GetKeyState(VK_NUMLOCK)&0x0001) ? 0x01 : 0x00;
+	key_state[VK_CAPITAL] = (GetKeyState(VK_CAPITAL)&0x0001) ? 0x01 : 0x00;
+	key_state[VK_SCROLL] = (GetKeyState(VK_SCROLL)&0x0001) ? 0x01 : 0x00;
+	Py_END_ALLOW_THREADS
 %}
 
 %wrapper %{
   unsigned short ConvertToASCII(unsigned int keycode, unsigned int scancode);
+	void UpdateKeyState(unsigned int vkey, int msg);
 
   LRESULT CALLBACK cLLKeyboardCallback(int code, WPARAM wParam, LPARAM lParam) {
     PyObject *arglist, *r;
@@ -77,10 +85,13 @@
       free(win_name);
 
     // decide whether or not to call the next hook
-    if(code <  0 || pass)
+    if(code < 0 || pass) {
+			UpdateKeyState(kbd->vkCode, wParam);
       result = CallNextHookEx(hHooks[WH_KEYBOARD_LL], code, wParam, lParam);
-    else
+    } else {
+    	// return a non-zero to prevent further processing
       result = 42;
+		}
     return result;
   }
 
@@ -131,8 +142,10 @@
     // decide whether or not to call the next hook
     if(code < 0 || pass)
       result = CallNextHookEx(hHooks[WH_MOUSE_LL], code, wParam, lParam);
-    else
+    else {
+    	// return non-zero to prevent further processing
       result = 42;
+    }
     return result;
   }
 
@@ -207,44 +220,43 @@
 
     return result;
   }
-
-  void UpdateKeyboardState() {
-    // nasty way to get the states of modifier keys on the keyboard
-    // GetKeyboardState API call doesn't not work because we get messages before they're posted
-    //    to the target window's message queue
-    Py_BEGIN_ALLOW_THREADS
-    if (GetKeyState(VK_MENU)&0x8000)
-      key_state[VK_MENU] = 0x80;
-    else
-      key_state[VK_MENU] = 0;
-    if (GetKeyState(VK_SHIFT)&0x8000)
-      key_state[VK_SHIFT] = 0x80;
-    else
-      key_state[VK_SHIFT] = 0;
-    if (GetKeyState(VK_CONTROL)&0x8000)
-      key_state[VK_CONTROL] = 0x80;
-    else
-      key_state[VK_CONTROL] = 0;
-    if (GetKeyState(VK_NUMLOCK)&0x0001)
-      key_state[VK_NUMLOCK] = 0x01;
-    else
-      key_state[VK_NUMLOCK] = 0;
-    if (GetKeyState(VK_CAPITAL)&0x0001)
-      key_state[VK_CAPITAL] = 0x01;
-    else
-      key_state[VK_CAPITAL] = 0;
-    if (GetKeyState(VK_SCROLL)&0x0001)
-      key_state[VK_SCROLL] = 0x01;
-    else
-      key_state[VK_SCROLL] = 0;
-    Py_END_ALLOW_THREADS
+  
+  void SetKeyState(unsigned int vkey, int down) {
+	  // (1 > 0) ? True : False
+ 		if (vkey == VK_MENU || vkey == VK_LMENU || vkey == VK_RMENU) {
+ 			key_state[VK_MENU] = (down) ? 0x80 : 0x00;
+ 			key_state[vkey] = (down) ? 0x80 : 0x00; 			
+ 		} else if (vkey == VK_SHIFT || vkey == VK_LSHIFT || vkey == VK_RSHIFT) {
+ 			key_state[VK_SHIFT] = (down) ? 0x80 : 0x00;
+ 			key_state[vkey] = (down) ? 0x80 : 0x00;
+ 		} else if (vkey == VK_CONTROL || vkey == VK_LCONTROL || vkey == VK_RCONTROL) {
+ 			key_state[VK_CONTROL] = (down) ? 0x80 : 0x00;
+ 			key_state[vkey] = (down) ? 0x80 : 0x00;
+ 		} else if (vkey == VK_NUMLOCK && !down) {
+ 			key_state[VK_NUMLOCK] = !key_state[VK_NUMLOCK];
+ 		} else if (vkey == VK_CAPITAL && !down) {
+ 			key_state[VK_CAPITAL] = !key_state[VK_CAPITAL];
+ 		} else if (vkey == VK_SCROLL && !down) {
+ 			key_state[VK_SCROLL] = !key_state[VK_SCROLL];
+ 		}
+  }
+  
+  void UpdateKeyState(unsigned int vkey, int msg) {
+  	if (msg == WM_KEYDOWN || msg == WM_SYSKEYDOWN) {
+			SetKeyState(vkey, 1);
+  	} else if (msg == WM_KEYUP || msg == WM_SYSKEYUP) {
+			SetKeyState(vkey, 0);
+  	}
+  }
+  
+  unsigned int cGetKeyState(unsigned int vkey) {
+  	return key_state[vkey];
   }
 
   unsigned short ConvertToASCII(unsigned int keycode, unsigned int scancode) {
     int r;
     unsigned short c = 0;
 
-    UpdateKeyboardState();
     Py_BEGIN_ALLOW_THREADS
     r = ToAscii(keycode, scancode, key_state, &c, 0);
     Py_END_ALLOW_THREADS
@@ -256,5 +268,6 @@
   }
 %}
 
+unsigned int cGetKeyState(unsigned int vkey);
 int cSetHook(int idHook, PyObject *pyfunc);
 int cUnhook(int idHook);

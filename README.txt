@@ -1,5 +1,8 @@
 Change log
 ----------
+4/1/05
+- Changed stateful key tracking to work better with SendKeys
+- Possibly fixed bug where weird chars were insert when Alt+Arrow key pressed
 
 2/23/05
 - Added documentation
