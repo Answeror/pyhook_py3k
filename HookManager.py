@@ -1,6 +1,10 @@
 from pyHook.cpyHook import *
 
 class HookConstants:
+  '''
+  Stores internal windows hook constants including hook types, mappings from virtual
+  keycode name to value and value to name, and event type value to name.
+  '''
   WH_MIN = -1
   WH_MSGFILTER = -1
   WH_JOURNALRECORD = 0
@@ -94,20 +98,42 @@ class HookConstants:
                  WM_SYSCHAR : 'key sys char', WM_SYSDEADCHAR : 'key sys dead char'}
 
   def MsgToName(cls, msg):
+    '''
+    Class method. Converts a message value to message name.
+    
+    @param msg: Keyboard or mouse event message
+    @type msg: integer
+    @return: Name of the event
+    @rtype: string
+    '''
     return HookConstants.msg_to_name.get(msg)
 
   def VKeyToID(cls, vkey):
+    '''
+    Class method. Converts a virtual keycode name to its value.
+    
+    @param vkey: Virtual keycode name
+    @type vkey: string
+    @return: Virtual keycode value
+    @rtype: integer
+    '''
     return HookConstants.vk_to_id.get(vkey)
 
   def IDToName(cls, code):
-    text = None
+    '''
+    Class method. Gets the keycode name for the given value.
+    
+    @param vkey: Virtual keycode value
+    @type vkey: integer
+    @return: Virtual keycode name
+    @rtype: string
+    '''
     if (code >= 0x30 and code <= 0x39) or (code >= 0x41 and code <= 0x5A):
       text = chr(code)
     else:
       text = HookConstants.id_to_vk.get(code)
       if text is not None:
         text = text[3:].title()
-
     return text
 
   MsgToName=classmethod(MsgToName)
@@ -115,90 +141,117 @@ class HookConstants:
   VKeyToID=classmethod(VKeyToID)
 
 class HookEvent(object):
+  '''
+  Holds information about a general hook event.
+  
+  @ivar Message: Keyboard or mouse event message
+  @type Message: integer
+  @ivar Time: Seconds since the epoch when the even current
+  @type Time: integer
+  @ivar Window: Window handle of the foreground window at the time of the event
+  @type Window: integer
+  @ivar WindowName: Name of the foreground window at the time of the event
+  @type WindowName: string
+  '''
   def __init__(self, msg, time, hwnd, window_name):
-    self.msg = msg
-    self.time = time
-    self.hwnd = hwnd
-    self.window_name = window_name
+    '''Initializes an event instance.'''
+    self.Message = msg
+    self.Time = time
+    self.Window = hwnd
+    self.WindowName = window_name
 
   def GetMessageName(self):
+    '''
+    @return: Name of the event
+    @rtype: string
+    '''
     return HookConstants.MsgToName(self.msg)
-  def GetMessage(self):
-    return self.msg
-  def GetTime(self):
-    return self.time
-  def GetWindow(self):
-    return self.hwnd
-  def GetWindowName(self):
-    return self.window_name
-
   MessageName = property(fget=GetMessageName)
-  Message = property(fget=GetMessage)
-  Time = property(fget=GetTime)
-  Window = property(fget=GetWindow)
-  WindowName = property(fget=GetWindowName)
 
 class MouseEvent(HookEvent):
+  '''
+  Holds information about a mouse event.
+  
+  @ivar Position: Location of the mouse event on the screen
+  @type Position: 2-tuple of integer
+  @ivar Wheel: Wheel event data
+  @type Wheel: integer
+  @ivar Injected: Was this event generated programmatically?
+  @type Injected: boolean
+  '''  
   def __init__(self, msg, x, y, data, flags, time, hwnd, window_name):
+    '''Initializes an instance of the class.'''
     HookEvent.__init__(self, msg, time, hwnd, window_name)
-    self.pos = (x,y)
-
+    self.Position = (x,y)
     if data > 0: w = 1
     elif data < 0: w = -1
     else: w = 0
-    self.wheel = w
-
-    self.injected = flags & 0x01
-
-  def GetPosition(self):
-    return self.pos
-  def GetWheel(self):
-    return self.wheel
-  def IsInjected(self):
-    return self.injected
-
-  Position = property(fget=GetPosition)
-  Wheel = property(fget=GetWheel)
-  Injected = property(fget=IsInjected)
+    self.Wheel = w
+    self.Injected = flags & 0x01
 
 class KeyboardEvent(HookEvent):
+  '''
+  Holds information about a mouse event.
+  
+  @ivar KeyID: Virtual key code
+  @type KeyID: integer
+  @ivar ScanCode: Scan code
+  @type ScanCode: integer
+  @ivar Ascii: ASCII value, if one exists
+  @type Ascii: string
+  '''  
   def __init__(self, msg, vk_code, scan_code, ascii, flags, time, hwnd, window_name):
+    '''Initializes an instances of the class.'''
     HookEvent.__init__(self, msg, time, hwnd, window_name)
+    self.KeyID = vk_code
+    self.ScanCode = scan_code
+    self.Ascii = ascii
+    self.flags = flags    
 
-    self.vk_code = vk_code
-    self.scan_code = scan_code
-    self.flags = flags
-    self.ascii = ascii
-
-  def GetAscii(self):
-    return self.ascii
   def GetKey(self):
+    '''
+    @return: Name of the virtual keycode
+    @rtype: string
+    '''
     return HookConstants.IDToName(self.vk_code)
-  def GetKeyID(self):
-    return self.vk_code
-  def GetScanCode(self):
-    return self.scan_code
+    
   def IsExtended(self):
+    '''
+    @return: Is this an extended key?
+    @rtype: boolean
+    '''
     return self.flags & 0x01
+    
   def IsInjected(self):
+    '''
+    @return: Was this event generated programmatically?
+    @rtype: boolean
+    '''    
     return self.flags & 0x10
+    
   def IsAlt(self):
+    '''
+    @return: Was the alt key depressed?
+    @rtype: boolean
+    '''  
     return self.flags & 0x20
+    
   def IsTransition(self):
+    '''
+    @return: Is this a transition from up to down or vice versa?
+    @rtype: boolean
+    '''
     return self.flags & 0x80
 
   Key = property(fget=GetKey)
-  KeyID = property(fget=GetKeyID)
-  ScanCode = property(fget=GetScanCode)
   Extended = property(fget=IsExtended)
   Injected = property(fget=IsInjected)
   Alt = property(fget=IsAlt)
   Transition = property(fget=IsTransition)
-  Ascii = property(fget=GetAscii)
 
 class HookManager(object):
   def __init__(self):
-    '''Initialize an instance by setting up an empty switch network.'''
+    '''Initializes an instance by setting up an empty set of handlers.'''
     self.mouse_funcs = {}
     self.keyboard_funcs = {}
 
@@ -211,45 +264,45 @@ class HookManager(object):
     self.UnhookKeyboard()
 
   def HookMouse(self):
-    '''Begin watching for mouse events.'''
+    '''Begins watching for mouse events.'''
     cSetHook(HookConstants.WH_MOUSE_LL, self.MouseSwitch)
     self.mouse_hook = True
 
   def HookKeyboard(self):
-    '''Begin watching for keyboard events.'''
+    '''Begins watching for keyboard events.'''
     cSetHook(HookConstants.WH_KEYBOARD_LL, self.KeyboardSwitch)
     self.keyboard_hook = True
 
   def UnhookMouse(self):
-    '''End watching for mouse events.'''
+    '''Stops watching for mouse events.'''
     if self.mouse_hook:
       cUnhook(HookConstants.WH_MOUSE_LL)
       self.mouse_hook = False
 
   def UnhookKeyboard(self):
-    '''End watching for keyboard events.'''
+    '''Stops watching for keyboard events.'''
     if self.keyboard_hook:
       cUnhook(HookConstants.WH_KEYBOARD_LL)
       self.keyboard_hook = False
 
   def MouseSwitch(self, msg, x, y, data, flags, time, hwnd, window_name):
-    '''Pass a mouse event on to the appropriate handler if one is registered.
+    '''
+    Passes a mouse event on to the appropriate handler if one is registered.
 
-    Params:
-
-    'msg': The integer ID of the Windows message
-
-    'x': The x coordinate of the mouse event
-
-    'y': The y coordinate of the mouse event
-
-    'data': The data associated with the mouse event (scroll information)
-
-    'flags': Flags associated with the mouse event (injected or not)
-
-    'time': The time since the epoch of the mouse event
-
-    'hwnd': Handle to the window that will receive the event
+    @param msg: Message value
+    @type msg: integer
+    @param x: x-coordinate of the mouse event
+    @type x: integer
+    @param y: y-coordinate of the mouse event
+    @type y: integer    
+    @param data: Data associated with the mouse event (scroll information)
+    @type data: integer
+    @param flags: Flags associated with the mouse event (injected or not)
+    @type flags: integer
+    @param time: Seconds since the epoch when the even current
+    @type time: integer
+    @param hwnd: Window handle of the foreground window at the time of the event
+    @type hwnd: integer
     '''
     event = MouseEvent(msg, x, y, data, flags, time, hwnd, window_name)
     func = self.mouse_funcs.get(msg)
@@ -259,23 +312,23 @@ class HookManager(object):
       return True
 
   def KeyboardSwitch(self, msg, vk_code, scan_code, ascii, flags, time, hwnd, win_name):
-    '''Pass a keyboard event on to the appropriate handler if one is registered.
-
-    Params:
-
-    'msg': The integer ID of the Windows message
-
-    'vk_code': The virtual keycode of the key
-
-    'scan_code': The scan code of the key
-
-    'ascii': The ascii numeric value for the key if available
-
-    'flags': Flags associated with the key event (injected or not, extended key, etc.)
-
-    'time': The time since the epoch of the key event
-
-    'hwnd': Handle to the window that will receive the event
+    '''
+    Passes a keyboard event on to the appropriate handler if one is registered.
+    
+    @param msg: Message value
+    @type msg: integer
+    @param vk_code: The virtual keycode of the key
+    @type vk_code: integer
+    @param scan_code: The scan code of the key
+    @type scan_code: integer
+    @param ascii: ASCII numeric value for the key if available
+    @type ascii: integer
+    @param flags: Flags associated with the key event (injected or not, extended key, etc.)
+    @type flags: integer
+    @param time: Time since the epoch of the key event
+    @type time: integer
+    @param hwnd: Window handle of the foreground window at the time of the event
+    @type hwnd: integer
     '''
     event = KeyboardEvent(msg, vk_code, scan_code, ascii, flags, time, hwnd, win_name)
     func = self.keyboard_funcs.get(msg)
