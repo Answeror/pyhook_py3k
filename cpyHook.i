@@ -203,9 +203,10 @@
     return result;
   }
 
-  WORD GetAsciiChar(unsigned int keycode, unsigned int scancode) {
-    WORD c;
-    PBYTE state[256];
+  unsigned short GetAsciiChar(unsigned int keycode, unsigned int scancode) {
+    unsigned short c;
+    BYTE state[256];
+    int r;
 
     Py_BEGIN_ALLOW_THREADS
     r = GetKeyboardState(state);
@@ -215,7 +216,7 @@
       return 0;
     }
     Py_BEGIN_ALLOW_THREADS
-    r = ToAscii(keycode, scancode, state, &c, 0)
+    r = ToAscii(keycode, scancode, state, &c, 0);
     Py_END_ALLOW_THREADS
     if(r < 0) {
       PyErr_SetString(PyExc_ValueError, "Could not convert to ASCII");
@@ -225,6 +226,6 @@
   }
 %}
 
-WORD GetAsciiChar(unsigned int keycode, unsigned int scancode);
+unsigned short GetAsciiChar(unsigned int keycode, unsigned int scancode);
 int cSetHook(int idHook, PyObject *pyfunc);
 int cUnhook(int idHook);

@@ -27,7 +27,7 @@ class myFrame(wx.Frame):
     print 'Wheel:',event.Wheel
     print 'Injected:',event.Injected
     print '---'
-    
+
     # return True to pass the event to other handlers
     # return False to stop the event from propagating
     return True
@@ -38,6 +38,7 @@ class myFrame(wx.Frame):
     print 'Time:',event.Time
     print 'Window:',event.Window
     print 'WindowName:',event.WindowName
+    print 'Ascii:', event.Ascii
     print 'Key:', event.Key
     print 'KeyID:', event.KeyID
     print 'ScanCode:', event.ScanCode
@@ -46,9 +47,9 @@ class myFrame(wx.Frame):
     print 'Alt', event.Alt
     print 'Transition', event.Transition
     print '---'
-    
+
     # return True to pass the event to other handlers
-    # return False to stop the event from propagating    
+    # return False to stop the event from propagating
     return True
 
   def OnClose(self, event):
