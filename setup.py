@@ -5,12 +5,12 @@ from distutils.command.build_ext import build_ext
 
 libs = ['user32']
 
-setup(name="pyHook", version="1.0",
-      py_modules = ['pyHook', 'pyHookManager'],
-      ext_modules = [Extension('_pyHook',
-                               ['pyHook.i'],
-                               libraries=libs,
-                               extra_link_args=['/SECTION:.GLOBALS,RWS']
-                               )
-                     ],
+setup(name="pyHook", version="1.1",
+      author="Peter Parente",
+      author_email="parente@cs.unc.edu",
+      url="http://www.cs.unc.edu/Research/assist/",
+      description="pyHook: Python wrapper for out-of-context input hooks in Windows",
+      packages = ['pyHook'],
+      ext_modules = [Extension('pyHook._cpyHook', ['pyHook/cpyHook.i'], libraries=libs)],
+      data_files=[('Lib/site-packages/pyHook', ["pyHook/LICENSE.txt"])]
       )
