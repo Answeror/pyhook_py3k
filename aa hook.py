@@ -31,32 +31,32 @@ class myFrame(wx.Frame):
     print
     print 'Object:'
     try:
-      print '  Name:', ao.Name()
+      print '  Name:', ao.Name
     except:
       print
     
     try:
-      print '  Value:', ao.Value()
+      print '  Value:', ao.Value
     except:
       print
 
     try:
-      print '  Role:', ao.RoleText()
+      print '  Role:', ao.RoleText
     except:
       print
     
     try:
-      print '  Description:', ao.Description()
+      print '  Description:', ao.Description
     except:
       print
     
     try:
-      print '  State:', ao.StateText()
+      print '  State:', ao.StateText
     except:
       print
       
     try:
-      print '  Shortcut:', ao.KeyboardShortcut()
+      print '  Shortcut:', ao.KeyboardShortcut
     except:
       print
     

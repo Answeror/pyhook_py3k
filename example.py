@@ -1,4 +1,3 @@
-import wx
 import pyHook
 
 def OnMouseEvent(event):
@@ -47,5 +46,5 @@ hm.HookMouse()
 hm.HookKeyboard()
 
 if __name__ == '__main__':
-  import win32gui
-  win32gui.PumpMessages()
+  import pythoncom
+  pythoncom.PumpMessages()

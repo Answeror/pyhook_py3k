@@ -1,7 +1,9 @@
-Intro
------
-This is a Python interface to the Windows API function SetWindowsHookEx. The library currently
-supports the low level keyboard and mouse hooks (since they are out-of-context callbacks).
+Change log
+----------
+
+2/23/05
+- Added documentation
+- Added KeyAll property to HookManager
 
 10/11/04
 - Added support for translating virtual keycodes to ASCII characters when possible
@@ -12,9 +14,7 @@ supports the low level keyboard and mouse hooks (since they are out-of-context c
 - Added support for allowing/disallowing event propagation (see example.py)
 - Added a proper __init__.py to the package
 
-Examples
---------
-See the example.py file for a simple example of how to use pyHook.
-See the aa hook.py file for a example of how pyHook can be used alongside our pyAA library.
+Website
+-------
 
-Both examples require wxPython, but only because I didn't want to write my own Windows message pump.
+Visit http://www.cs.unc.edu/assist and click developer resources for binaries, documentation, and tutorials.
