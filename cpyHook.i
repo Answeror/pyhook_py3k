@@ -19,11 +19,6 @@
 }
 
 %init %{
-  //set the arrays to NULL
-//   for(i=0; i < WH_MAX; i++) {
-//     callback_funcs[i] = NULL;
-//     hHooks[i] = NULL;
-//   }
   memset(key_state, 0, 256);
   memset(callback_funcs, 0, WH_MAX);
   memset(hHooks, 0, WH_MAX);
@@ -218,27 +213,27 @@
     // GetKeyboardState API call doesn't not work because we get messages before they're posted
     //    to the target window's message queue
     Py_BEGIN_ALLOW_THREADS
-    if (GetAsyncKeyState(VK_MENU)&0x8000)
+    if (GetKeyState(VK_MENU)&0x8000)
       key_state[VK_MENU] = 0x80;
     else
       key_state[VK_MENU] = 0;
-    if (GetAsyncKeyState(VK_SHIFT)&0x8000)
+    if (GetKeyState(VK_SHIFT)&0x8000)
       key_state[VK_SHIFT] = 0x80;
     else
       key_state[VK_SHIFT] = 0;
-    if (GetAsyncKeyState(VK_CONTROL)&0x8000)
+    if (GetKeyState(VK_CONTROL)&0x8000)
       key_state[VK_CONTROL] = 0x80;
     else
       key_state[VK_CONTROL] = 0;
-    if (GetAsyncKeyState(VK_NUMLOCK)&0x0001)
+    if (GetKeyState(VK_NUMLOCK)&0x0001)
       key_state[VK_NUMLOCK] = 0x01;
     else
       key_state[VK_NUMLOCK] = 0;
-    if (GetAsyncKeyState(VK_CAPITAL)&0x0001)
+    if (GetKeyState(VK_CAPITAL)&0x0001)
       key_state[VK_CAPITAL] = 0x01;
     else
       key_state[VK_CAPITAL] = 0;
-    if (GetAsyncKeyState(VK_SCROLL)&0x0001)
+    if (GetKeyState(VK_SCROLL)&0x0001)
       key_state[VK_SCROLL] = 0x01;
     else
       key_state[VK_SCROLL] = 0;
