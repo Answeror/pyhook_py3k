@@ -1,9 +1,9 @@
 '''pyHook: Python wrapper for out-of-context input hooks in Windows
 
-The pyHook package provides callbacks for global mouse and keyboard events in Windows. Python 
-applications register event handlers for user input events such as left mouse down, left mouse up, 
-key down, etc. and set the keyboard and/or mouse hook. The underlying C library reports information 
-like the time of the event, the name of the window in which the event occurred, the value of the 
+The pyHook package provides callbacks for global mouse and keyboard events in Windows. Python
+applications register event handlers for user input events such as left mouse down, left mouse up,
+key down, etc. and set the keyboard and/or mouse hook. The underlying C library reports information
+like the time of the event, the name of the window in which the event occurred, the value of the
 event, any keyboard modifiers, etc.
 '''
 
@@ -22,8 +22,8 @@ from distutils.core import setup, Extension
 libs = ['user32']
 doclines = __doc__.split('\n')
 
-setup(name='pyHook', 
-      version='1.3',
+setup(name='pyHook',
+      version='1.4',
       author='Peter Parente',
       author_email='parente@cs.unc.edu',
       url='http://www.cs.unc.edu/~parente',
@@ -36,5 +36,5 @@ setup(name='pyHook',
       packages = ['pyHook'],
       package_dir = {'pyHook' : ""},
       ext_modules = [Extension('pyHook._cpyHook', ['cpyHook.i'], libraries=libs)],
-      data_files=[('Lib/site-packages/pyHook', ['LICENSE.txt'])]
+      data_files=[('Lib/site-packages/pyHook', ['LICENSE.txt', 'README.txt'])]
       )

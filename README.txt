@@ -1,7 +1,11 @@
 Intro
 -----
-This is a Python interface to the Windows API function SetWindowsHookEx. The library currently 
+This is a Python interface to the Windows API function SetWindowsHookEx. The library currently
 supports the low level keyboard and mouse hooks (since they are out-of-context callbacks).
+
+10/11/04
+- Added support for translating virtual keycodes to ASCII characters when possible
+- Added support for stopping event propagation
 
 9/13/04
 - AA example was updated to work with the wx namespace
