@@ -224,14 +224,14 @@
   void SetKeyState(unsigned int vkey, int down) {
 	  // (1 > 0) ? True : False
  		if (vkey == VK_MENU || vkey == VK_LMENU || vkey == VK_RMENU) {
- 			key_state[VK_MENU] = (down) ? 0x80 : 0x00;
- 			key_state[vkey] = (down) ? 0x80 : 0x00; 			
+ 			key_state[vkey] = (down) ? 0x80 : 0x00;
+ 			key_state[VK_MENU] = key_state[VK_LMENU] | key_state[VK_RMENU];
  		} else if (vkey == VK_SHIFT || vkey == VK_LSHIFT || vkey == VK_RSHIFT) {
- 			key_state[VK_SHIFT] = (down) ? 0x80 : 0x00;
  			key_state[vkey] = (down) ? 0x80 : 0x00;
+ 			key_state[VK_SHIFT] = key_state[VK_LSHIFT] | key_state[VK_RSHIFT];
  		} else if (vkey == VK_CONTROL || vkey == VK_LCONTROL || vkey == VK_RCONTROL) {
- 			key_state[VK_CONTROL] = (down) ? 0x80 : 0x00;
  			key_state[vkey] = (down) ? 0x80 : 0x00;
+ 			key_state[VK_CONTROL] = key_state[VK_LCONTROL] | key_state[VK_RCONTROL];
  		} else if (vkey == VK_NUMLOCK && !down) {
  			key_state[VK_NUMLOCK] = !key_state[VK_NUMLOCK];
  		} else if (vkey == VK_CAPITAL && !down) {
