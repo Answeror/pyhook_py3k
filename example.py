@@ -38,7 +38,7 @@ class myFrame(wx.Frame):
     print 'Time:',event.Time
     print 'Window:',event.Window
     print 'WindowName:',event.WindowName
-    print 'Ascii:', event.Ascii
+    print 'Ascii:', event.Ascii, chr(event.Ascii)
     print 'Key:', event.Key
     print 'KeyID:', event.KeyID
     print 'ScanCode:', event.ScanCode

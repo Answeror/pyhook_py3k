@@ -7,6 +7,7 @@
 
   PyObject* callback_funcs[WH_MAX];
   HHOOK hHooks[WH_MAX];
+  BYTE key_state[256];
 %}
 
 %typemap(python, in) PyObject *pyfunc {
@@ -19,18 +20,24 @@
 
 %init %{
   //set the arrays to NULL
-  for(i=0; i < WH_MAX; i++) {
-    callback_funcs[i] = NULL;
-    hHooks[i] = NULL;
-  }
+//   for(i=0; i < WH_MAX; i++) {
+//     callback_funcs[i] = NULL;
+//     hHooks[i] = NULL;
+//   }
+  memset(key_state, 0, 256);
+  memset(callback_funcs, 0, WH_MAX);
+  memset(hHooks, 0, WH_MAX);
 %}
 
 %wrapper %{
+  unsigned short ConvertToASCII(unsigned int keycode, unsigned int scancode);
+
   LRESULT CALLBACK cLLKeyboardCallback(int code, WPARAM wParam, LPARAM lParam) {
     PyObject *arglist, *r;
     PKBDLLHOOKSTRUCT kbd;
     HWND hwnd;
     PSTR win_name = NULL;
+    unsigned short ascii = 0;
     static int win_len;
     static long result;
     long pass = 1;
@@ -51,8 +58,11 @@
       GetWindowText(hwnd, win_name, win_len + 1);
     }
 
+    // convert to an ASCII code if possible
+    ascii = ConvertToASCII(kbd->vkCode, kbd->scanCode);
+
     // pass the message on to the Python function
-    arglist = Py_BuildValue("(iiiiiiz)", wParam, kbd->vkCode, kbd->scanCode,
+    arglist = Py_BuildValue("(iiiiiiiz)", wParam, kbd->vkCode, kbd->scanCode, ascii,
                             kbd->flags, kbd->time, hwnd, win_name);
     r = PyObject_CallObject(callback_funcs[WH_KEYBOARD_LL], arglist);
 
@@ -203,29 +213,53 @@
     return result;
   }
 
-  unsigned short GetAsciiChar(unsigned int keycode, unsigned int scancode) {
-    unsigned short c;
-    BYTE state[256];
-    int r;
-
+  void UpdateKeyboardState() {
+    // nasty way to get the states of modifier keys on the keyboard
+    // GetKeyboardState API call doesn't not work because we get messages before they're posted
+    //    to the target window's message queue
     Py_BEGIN_ALLOW_THREADS
-    r = GetKeyboardState(state);
+    if (GetAsyncKeyState(VK_MENU)&0x8000)
+      key_state[VK_MENU] = 0x80;
+    else
+      key_state[VK_MENU] = 0;
+    if (GetAsyncKeyState(VK_SHIFT)&0x8000)
+      key_state[VK_SHIFT] = 0x80;
+    else
+      key_state[VK_SHIFT] = 0;
+    if (GetAsyncKeyState(VK_CONTROL)&0x8000)
+      key_state[VK_CONTROL] = 0x80;
+    else
+      key_state[VK_CONTROL] = 0;
+    if (GetAsyncKeyState(VK_NUMLOCK)&0x0001)
+      key_state[VK_NUMLOCK] = 0x01;
+    else
+      key_state[VK_NUMLOCK] = 0;
+    if (GetAsyncKeyState(VK_CAPITAL)&0x0001)
+      key_state[VK_CAPITAL] = 0x01;
+    else
+      key_state[VK_CAPITAL] = 0;
+    if (GetAsyncKeyState(VK_SCROLL)&0x0001)
+      key_state[VK_SCROLL] = 0x01;
+    else
+      key_state[VK_SCROLL] = 0;
     Py_END_ALLOW_THREADS
-    if(r == 0) {
-      PyErr_SetString(PyExc_ValueError, "Could not get keyboard state");
-      return 0;
-    }
+  }
+
+  unsigned short ConvertToASCII(unsigned int keycode, unsigned int scancode) {
+    int r;
+    unsigned short c = 0;
+
+    UpdateKeyboardState();
     Py_BEGIN_ALLOW_THREADS
-    r = ToAscii(keycode, scancode, state, &c, 0);
+    r = ToAscii(keycode, scancode, key_state, &c, 0);
     Py_END_ALLOW_THREADS
     if(r < 0) {
-      PyErr_SetString(PyExc_ValueError, "Could not convert to ASCII");
+      //PyErr_SetString(PyExc_ValueError, "Could not convert to ASCII");
       return 0;
     }
     return c;
   }
 %}
 
-unsigned short GetAsciiChar(unsigned int keycode, unsigned int scancode);
 int cSetHook(int idHook, PyObject *pyfunc);
 int cUnhook(int idHook);

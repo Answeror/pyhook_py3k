@@ -162,15 +162,16 @@ class MouseEvent(HookEvent):
   Injected = property(fget=IsInjected)
 
 class KeyboardEvent(HookEvent):
-  def __init__(self, msg, vk_code, scan_code, flags, time, hwnd, window_name):
+  def __init__(self, msg, vk_code, scan_code, ascii, flags, time, hwnd, window_name):
     HookEvent.__init__(self, msg, time, hwnd, window_name)
 
     self.vk_code = vk_code
     self.scan_code = scan_code
     self.flags = flags
+    self.ascii = ascii
 
-  def GetCharacter(self):
-    return GetAsciiChar(self.vk_code, self.scan_code)
+  def GetAscii(self):
+    return self.ascii
   def GetKey(self):
     return HookConstants.IDToName(self.vk_code)
   def GetKeyID(self):
@@ -193,7 +194,7 @@ class KeyboardEvent(HookEvent):
   Injected = property(fget=IsInjected)
   Alt = property(fget=IsAlt)
   Transition = property(fget=IsTransition)
-  Ascii = property(fget=GetCharacter)
+  Ascii = property(fget=GetAscii)
 
 class HookManager(object):
   def __init__(self):
@@ -257,7 +258,7 @@ class HookManager(object):
     else:
       return True
 
-  def KeyboardSwitch(self, msg, vk_code, scan_code, flags, time, hwnd, win_name):
+  def KeyboardSwitch(self, msg, vk_code, scan_code, ascii, flags, time, hwnd, win_name):
     '''Pass a keyboard event on to the appropriate handler if one is registered.
 
     Params:
@@ -268,13 +269,15 @@ class HookManager(object):
 
     'scan_code': The scan code of the key
 
+    'ascii': The ascii numeric value for the key if available
+
     'flags': Flags associated with the key event (injected or not, extended key, etc.)
 
     'time': The time since the epoch of the key event
 
     'hwnd': Handle to the window that will receive the event
     '''
-    event = KeyboardEvent(msg, vk_code, scan_code, flags, time, hwnd, win_name)
+    event = KeyboardEvent(msg, vk_code, scan_code, ascii, flags, time, hwnd, win_name)
     func = self.keyboard_funcs.get(msg)
     if func:
       return func(event)
