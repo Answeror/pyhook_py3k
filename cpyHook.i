@@ -212,11 +212,11 @@
     result = UnhookWindowsHookEx(hHooks[idHook]);
     Py_END_ALLOW_THREADS
 
-    if(result)
+    if(result) {
+      //decrease the ref to the Python callback
+    	Py_DECREF(callback_funcs[idHook]);
       callback_funcs[idHook] = NULL;
-
-    //decrease the ref to the Python callback
-    Py_DECREF(callback_funcs[idHook]);
+    }
 
     return result;
   }
