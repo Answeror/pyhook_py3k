@@ -22,6 +22,7 @@
   memset(key_state, 0, 256);
   memset(callback_funcs, 0, WH_MAX);
   memset(hHooks, 0, WH_MAX);
+  PyEval_InitThreads();
   
   // get initial key state
   Py_BEGIN_ALLOW_THREADS
