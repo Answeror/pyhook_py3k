@@ -1,5 +1,10 @@
 Change log
 ----------
+1.6 (2008-07-20)
+- BUGFIX: deadkeys on international keyboards work correctly.
+- BUGFIX: pyHook can now be used in binaries built with py2exe (maybe this will
+          work with PyInstaller too).
+
 4/1/05
 - Changed stateful key tracking to work better with SendKeys
 - Possibly fixed bug where weird chars were insert when Alt+Arrow key pressed
@@ -17,7 +22,25 @@ Change log
 - Added support for allowing/disallowing event propagation (see example.py)
 - Added a proper __init__.py to the package
 
+
+Known bugs
+----------
+- PyInstaller can't build single-file executables using pyHook. This may be
+  fixed in 1.6, but hasn't been tested.
+- WM_CHAR messages are not intercepted by pyHook, even if SubscribeKeyChar() or
+  SubscribeKeyAll() are used to set the callback function.
+
+
+Limitations
+-----------
+- pyHook will not work on Win9x (no messages show up) as it uses hooks which
+  are not present in Windows systems prior to NT 4.0 SP3.
+
+
 Website
 -------
+Visit http://www.cs.unc.edu/assist and click developer resources for binaries,
+documentation, and tutorials.
 
-Visit http://www.cs.unc.edu/assist and click developer resources for binaries, documentation, and tutorials.
+Bug reports and feature requests should be reported via the Sourceforge page at
+https://sourceforge.net/projects/uncassist/

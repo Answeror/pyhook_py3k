@@ -103,7 +103,7 @@ class HookConstants:
   def MsgToName(cls, msg):
     '''
     Class method. Converts a message value to message name.
-    
+
     @param msg: Keyboard or mouse event message
     @type msg: integer
     @return: Name of the event
@@ -114,7 +114,7 @@ class HookConstants:
   def VKeyToID(cls, vkey):
     '''
     Class method. Converts a virtual keycode name to its value.
-    
+
     @param vkey: Virtual keycode name
     @type vkey: string
     @return: Virtual keycode value
@@ -125,7 +125,7 @@ class HookConstants:
   def IDToName(cls, code):
     '''
     Class method. Gets the keycode name for the given value.
-    
+
     @param code: Virtual keycode value
     @type code: integer
     @return: Virtual keycode name
@@ -146,7 +146,7 @@ class HookConstants:
 class HookEvent(object):
   '''
   Holds information about a general hook event.
-  
+
   @ivar Message: Keyboard or mouse event message
   @type Message: integer
   @ivar Time: Seconds since the epoch when the even current
@@ -174,14 +174,14 @@ class HookEvent(object):
 class MouseEvent(HookEvent):
   '''
   Holds information about a mouse event.
-  
+
   @ivar Position: Location of the mouse event on the screen
   @type Position: 2-tuple of integer
   @ivar Wheel: Positive if the wheel scrolls up, negative if down, zero otherwise
   @type Wheel: integer
   @ivar Injected: Was this event generated programmatically?
   @type Injected: boolean
-  '''  
+  '''
   def __init__(self, msg, x, y, data, flags, time, hwnd, window_name):
     '''Initializes an instance of the class.'''
     HookEvent.__init__(self, msg, time, hwnd, window_name)
@@ -195,21 +195,21 @@ class MouseEvent(HookEvent):
 class KeyboardEvent(HookEvent):
   '''
   Holds information about a mouse event.
-  
+
   @ivar KeyID: Virtual key code
   @type KeyID: integer
   @ivar ScanCode: Scan code
   @type ScanCode: integer
   @ivar Ascii: ASCII value, if one exists
   @type Ascii: string
-  '''  
+  '''
   def __init__(self, msg, vk_code, scan_code, ascii, flags, time, hwnd, window_name):
     '''Initializes an instances of the class.'''
     HookEvent.__init__(self, msg, time, hwnd, window_name)
     self.KeyID = vk_code
     self.ScanCode = scan_code
     self.Ascii = ascii
-    self.flags = flags    
+    self.flags = flags
 
   def GetKey(self):
     '''
@@ -217,28 +217,28 @@ class KeyboardEvent(HookEvent):
     @rtype: string
     '''
     return HookConstants.IDToName(self.KeyID)
-    
+
   def IsExtended(self):
     '''
     @return: Is this an extended key?
     @rtype: boolean
     '''
     return self.flags & 0x01
-    
+
   def IsInjected(self):
     '''
     @return: Was this event generated programmatically?
     @rtype: boolean
-    '''    
+    '''
     return self.flags & 0x10
-    
+
   def IsAlt(self):
     '''
     @return: Was the alt key depressed?
     @rtype: boolean
-    '''  
+    '''
     return self.flags & 0x20
-    
+
   def IsTransition(self):
     '''
     @return: Is this a transition from up to down or vice versa?
@@ -255,7 +255,7 @@ class KeyboardEvent(HookEvent):
 class HookManager(object):
   '''
   Registers and manages callbacks for low level mouse and keyboard events.
-  
+
   @ivar mouse_funcs: Callbacks for mouse events
   @type mouse_funcs: dictionary
   @ivar keyboard_funcs: Callbacks for keyboard events
@@ -309,7 +309,7 @@ class HookManager(object):
     @param x: x-coordinate of the mouse event
     @type x: integer
     @param y: y-coordinate of the mouse event
-    @type y: integer    
+    @type y: integer
     @param data: Data associated with the mouse event (scroll information)
     @type data: integer
     @param flags: Flags associated with the mouse event (injected or not)
@@ -329,7 +329,7 @@ class HookManager(object):
   def KeyboardSwitch(self, msg, vk_code, scan_code, ascii, flags, time, hwnd, win_name):
     '''
     Passes a keyboard event on to the appropriate handler if one is registered.
-    
+
     @param msg: Message value
     @type msg: integer
     @param vk_code: The virtual keycode of the key
@@ -356,7 +356,7 @@ class HookManager(object):
     '''
     Registers the given function as the callback for this mouse event type. Use the
     MouseMove property as a shortcut.
-    
+
     @param func: Callback function
     @type func: callable
     '''
@@ -367,9 +367,9 @@ class HookManager(object):
 
   def SubscribeMouseLeftUp(self, func):
     '''
-    Registers the given function as the callback for this mouse event type. Use the 
+    Registers the given function as the callback for this mouse event type. Use the
     MouseLeftUp property as a shortcut.
-    
+
     @param func: Callback function
     @type func: callable
     '''
@@ -380,12 +380,12 @@ class HookManager(object):
 
   def SubscribeMouseLeftDown(self, func):
     '''
-    Registers the given function as the callback for this mouse event type. Use the 
+    Registers the given function as the callback for this mouse event type. Use the
     MouseLeftDown property as a shortcut.
-    
+
     @param func: Callback function
     @type func: callable
-    '''    
+    '''
     if func is None:
       self.disconnect(self.mouse_funcs, HookConstants.WM_LBUTTONDOWN)
     else:
@@ -393,12 +393,12 @@ class HookManager(object):
 
   def SubscribeMouseLeftDbl(self, func):
     '''
-    Registers the given function as the callback for this mouse event type. Use the 
+    Registers the given function as the callback for this mouse event type. Use the
     MouseLeftDbl property as a shortcut.
-    
+
     @param func: Callback function
     @type func: callable
-    '''    
+    '''
     if func is None:
       self.disconnect(self.mouse_funcs, HookConstants.WM_LBUTTONDBLCLK)
     else:
@@ -406,12 +406,12 @@ class HookManager(object):
 
   def SubscribeMouseRightUp(self, func):
     '''
-    Registers the given function as the callback for this mouse event type. Use the 
+    Registers the given function as the callback for this mouse event type. Use the
     MouseRightUp property as a shortcut.
-    
+
     @param func: Callback function
     @type func: callable
-    '''    
+    '''
     if func is None:
       self.disconnect(self.mouse_funcs, HookConstants.WM_RBUTTONUP)
     else:
@@ -419,12 +419,12 @@ class HookManager(object):
 
   def SubscribeMouseRightDown(self, func):
     '''
-    Registers the given function as the callback for this mouse event type. Use the 
+    Registers the given function as the callback for this mouse event type. Use the
     MouseRightDown property as a shortcut.
-    
+
     @param func: Callback function
     @type func: callable
-    '''    
+    '''
     if func is None:
       self.disconnect(self.mouse_funcs, HookConstants.WM_RBUTTONDOWN)
     else:
@@ -432,12 +432,12 @@ class HookManager(object):
 
   def SubscribeMouseRightDbl(self, func):
     '''
-    Registers the given function as the callback for this mouse event type. Use the 
+    Registers the given function as the callback for this mouse event type. Use the
     MouseRightDbl property as a shortcut.
-    
+
     @param func: Callback function
     @type func: callable
-    '''    
+    '''
     if func is None:
       self.disconnect(self.mouse_funcs, HookConstants.WM_RBUTTONDBLCLK)
     else:
@@ -445,12 +445,12 @@ class HookManager(object):
 
   def SubscribeMouseMiddleUp(self, func):
     '''
-    Registers the given function as the callback for this mouse event type. Use the 
+    Registers the given function as the callback for this mouse event type. Use the
     MouseMiddleUp property as a shortcut.
-    
+
     @param func: Callback function
     @type func: callable
-    '''    
+    '''
     if func is None:
       self.disconnect(self.mouse_funcs, HookConstants.WM_MBUTTONUP)
     else:
@@ -458,9 +458,9 @@ class HookManager(object):
 
   def SubscribeMouseMiddleDown(self, func):
     '''
-    Registers the given function as the callback for this mouse event type. Use the 
+    Registers the given function as the callback for this mouse event type. Use the
     MouseMiddleDown property as a shortcut.
-    
+
     @param func: Callback function
     @type func: callable
     '''
@@ -471,12 +471,12 @@ class HookManager(object):
 
   def SubscribeMouseMiddleDbl(self, func):
     '''
-    Registers the given function as the callback for this mouse event type. Use the 
+    Registers the given function as the callback for this mouse event type. Use the
     MouseMiddleDbl property as a shortcut.
-    
+
     @param func: Callback function
     @type func: callable
-    '''    
+    '''
     if func is None:
       self.disconnect(self.mouse_funcs, HookConstants.WM_MBUTTONDBLCLK)
     else:
@@ -484,12 +484,12 @@ class HookManager(object):
 
   def SubscribeMouseWheel(self, func):
     '''
-    Registers the given function as the callback for this mouse event type. Use the 
+    Registers the given function as the callback for this mouse event type. Use the
     MouseWheel property as a shortcut.
-    
+
     @param func: Callback function
     @type func: callable
-    '''    
+    '''
     if func is None:
       self.disconnect(self.mouse_funcs, HookConstants.WM_MOUSEWHEEL)
     else:
@@ -499,22 +499,22 @@ class HookManager(object):
     '''
     Registers the given function as the callback for all mouse events. Use the
     MouseAll property as a shortcut.
-    
+
     @param func: Callback function
     @type func: callable
-    '''    
+    '''
     self.SubscribeMouseMove(func)
     self.SubscribeMouseWheel(func)
     self.SubscribeMouseAllButtons(func)
 
   def SubscribeMouseAllButtons(self, func):
     '''
-    Registers the given function as the callback for all mouse button events. Use the 
+    Registers the given function as the callback for all mouse button events. Use the
     MouseButtonAll property as a shortcut.
-    
+
     @param func: Callback function
     @type func: callable
-    '''    
+    '''
     self.SubscribeMouseAllButtonsDown(func)
     self. SubscribeMouseAllButtonsUp(func)
     self.SubscribeMouseAllButtonsDbl(func)
@@ -523,10 +523,10 @@ class HookManager(object):
     '''
     Registers the given function as the callback for all mouse button down events.
     Use the MouseAllButtonsDown property as a shortcut.
-    
+
     @param func: Callback function
     @type func: callable
-    '''    
+    '''
     self.SubscribeMouseLeftDown(func)
     self.SubscribeMouseRightDown(func)
     self.SubscribeMouseMiddleDown(func)
@@ -535,10 +535,10 @@ class HookManager(object):
     '''
     Registers the given function as the callback for all mouse button up events.
     Use the MouseAllButtonsUp property as a shortcut.
-    
+
     @param func: Callback function
     @type func: callable
-    '''        
+    '''
     self.SubscribeMouseLeftUp(func)
     self.SubscribeMouseRightUp(func)
     self.SubscribeMouseMiddleUp(func)
@@ -547,10 +547,10 @@ class HookManager(object):
     '''
     Registers the given function as the callback for all mouse button double click
     events. Use the MouseAllButtonsDbl property as a shortcut.
-    
+
     @param func: Callback function
     @type func: callable
-    '''    
+    '''
     self.SubscribeMouseLeftDbl(func)
     self.SubscribeMouseRightDbl(func)
     self.SubscribeMouseMiddleDbl(func)
@@ -559,10 +559,10 @@ class HookManager(object):
     '''
     Registers the given function as the callback for this keyboard event type.
     Use the KeyDown property as a shortcut.
-    
+
     @param func: Callback function
     @type func: callable
-    '''    
+    '''
     if func is None:
       self.disconnect(self.keyboard_funcs, HookConstants.WM_KEYDOWN)
       self.disconnect(self.keyboard_funcs, HookConstants.WM_SYSKEYDOWN)
@@ -574,7 +574,7 @@ class HookManager(object):
     '''
     Registers the given function as the callback for this keyboard event type.
     Use the KeyUp property as a shortcut.
-    
+
     @param func: Callback function
     @type func: callable
     '''
@@ -589,10 +589,13 @@ class HookManager(object):
     '''
     Registers the given function as the callback for this keyboard event type.
     Use the KeyChar property as a shortcut.
-    
+
+    B{Note}: this is currently non-functional, no WM_*CHAR messages are
+    processed by the keyboard hook.
+
     @param func: Callback function
     @type func: callable
-    '''    
+    '''
     if func is None:
       self.disconnect(self.keyboard_funcs, HookConstants.WM_CHAR)
       self.disconnect(self.keyboard_funcs, HookConstants.WM_DEADCHAR)
@@ -603,12 +606,12 @@ class HookManager(object):
       self.connect(self.keyboard_funcs, HookConstants.WM_DEADCHAR, func)
       self.connect(self.keyboard_funcs, HookConstants.WM_SYSCHAR, func)
       self.connect(self.keyboard_funcs, HookConstants.WM_SYSDEADCHAR, func)
-      
+
   def SubscribeKeyAll(self, func):
     '''
     Registers the given function as the callback for all keyboard events.
     Use the KeyAll property as a shortcut.
-    
+
     @param func: Callback function
     @type func: callable
     '''
@@ -643,7 +646,7 @@ class HookManager(object):
     '''
     Registers a callback to the given function for the event with the given ID in the
     provided dictionary. Internal use only.
-    
+
     @param switch: Collection of callbacks
     @type switch: dictionary
     @param id: Event type
@@ -657,7 +660,7 @@ class HookManager(object):
     '''
     Unregisters a callback for the event with the given ID in the provided dictionary.
     Internal use only.
-    
+
     @param switch: Collection of callbacks
     @type switch: dictionary
     @param id: Event type

@@ -4,6 +4,24 @@
 %{
   #define _WIN32_WINNT 0x400
   #include "windows.h"
+  
+  // These definitions are missing from some Windows Platform SDKs, so define
+  // them if yet undefined.
+  #ifndef MAPVP_VK_TO_VSC
+    #define MAPVK_VK_TO_VSC 0
+  #endif
+
+  #ifndef MAPVK_VSC_TO_VK
+    #define MAPVK_VSC_TO_VK 1
+  #endif
+
+  #ifndef MAPVK_VK_TO_CHAR
+  #define MAPVK_VK_TO_CHAR 2
+  #endif
+
+  #ifndef MAPVK_VSC_TO_VK_EX
+    #define MAPVK_VSC_TO_VK_EX 3
+  #endif
 
   PyObject* callback_funcs[WH_MAX];
   HHOOK hHooks[WH_MAX];
@@ -46,6 +64,10 @@
     static long result;
     long pass = 1;
     PyGILState_STATE gil;
+
+    // if message code < 0, return immediately
+    if(code<0)
+        CallNextHookEx(hHooks[WH_KEYBOARD_LL], code, wParam, lParam);
 
     // get the GIL
     gil = PyGILState_Ensure();
@@ -160,7 +182,10 @@
 
     //get the module handle
     Py_BEGIN_ALLOW_THREADS
-    hMod = GetModuleHandle("_cpyHook.pyd");
+    // try to get handle for current file - will succeed if called from a compiled .exe
+    hMod = GetModuleHandle(NULL);
+    if(NULL == hMod)    // otherwise use name for DLL
+        hMod = GetModuleHandle("_cpyHook.pyd");
     Py_END_ALLOW_THREADS
 
     //switch on the type of hook so we point to the right C callback
@@ -255,16 +280,11 @@
   }
 
   unsigned short ConvertToASCII(unsigned int keycode, unsigned int scancode) {
-    int r;
-    unsigned short c = 0;
+    unsigned short c;
 
     Py_BEGIN_ALLOW_THREADS
-    r = ToAscii(keycode, scancode, key_state, &c, 0);
+    c = MapVirtualKey(keycode, MAPVK_VK_TO_CHAR);
     Py_END_ALLOW_THREADS
-    if(r < 0) {
-      //PyErr_SetString(PyExc_ValueError, "Could not convert to ASCII");
-      return 0;
-    }
     return c;
   }
 %}
