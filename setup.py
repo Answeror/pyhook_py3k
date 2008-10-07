@@ -23,11 +23,11 @@ libs = ['user32']
 doclines = __doc__.split('\n')
 
 setup(name='pyHook',
-      version='1.5a',
+      version='1.5.1',
       author='Peter Parente',
       author_email='parente@cs.unc.edu',
-      url='http://www.cs.unc.edu/~parente',
-      download_url='http://www.sourceforge.net/projects/uncassist',
+      url='http://pyhook.sourceforge.net',
+      download_url='http://www.sourceforge.net/projects/pyhook',
       license='http://www.opensource.org/licenses/mit-license.php',
       platforms=['Win32'],
       description = doclines[0],
