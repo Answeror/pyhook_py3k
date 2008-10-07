@@ -4,24 +4,6 @@
 %{
   #define _WIN32_WINNT 0x400
   #include "windows.h"
-  
-  // These definitions are missing from some Windows Platform SDKs, so define
-  // them if yet undefined.
-  #ifndef MAPVP_VK_TO_VSC
-    #define MAPVK_VK_TO_VSC 0
-  #endif
-
-  #ifndef MAPVK_VSC_TO_VK
-    #define MAPVK_VSC_TO_VK 1
-  #endif
-
-  #ifndef MAPVK_VK_TO_CHAR
-  #define MAPVK_VK_TO_CHAR 2
-  #endif
-
-  #ifndef MAPVK_VSC_TO_VK_EX
-    #define MAPVK_VSC_TO_VK_EX 3
-  #endif
 
   PyObject* callback_funcs[WH_MAX];
   HHOOK hHooks[WH_MAX];
@@ -65,9 +47,14 @@
     long pass = 1;
     PyGILState_STATE gil;
 
+    // uncomment this next bit if you do not want to process events like "ctl-alt-del"
+    // and other events that are not supposed to be processed
+    // as per msdn documentation:
+    // http://msdn.microsoft.com/en-us/library/ms644985(VS.85).aspx
+
     // if message code < 0, return immediately
-    if(code<0)
-        CallNextHookEx(hHooks[WH_KEYBOARD_LL], code, wParam, lParam);
+    //if(code<0)
+    //    CallNextHookEx(hHooks[WH_KEYBOARD_LL], code, wParam, lParam);
 
     // get the GIL
     gil = PyGILState_Ensure();
@@ -280,11 +267,16 @@
   }
 
   unsigned short ConvertToASCII(unsigned int keycode, unsigned int scancode) {
-    unsigned short c;
+    int r;
+    unsigned short c = 0;
 
     Py_BEGIN_ALLOW_THREADS
-    c = MapVirtualKey(keycode, MAPVK_VK_TO_CHAR);
+    r = ToAscii(keycode, scancode, key_state, &c, 0);
     Py_END_ALLOW_THREADS
+    if(r < 0) {
+      //PyErr_SetString(PyExc_ValueError, "Could not convert to ASCII");
+      return 0;
+    }
     return c;
   }
 %}
