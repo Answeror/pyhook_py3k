@@ -5,6 +5,7 @@ pyHook Change Log
 
 - Back out the bugfix for deadkeys, since it broke ascii conversion.
 - Allow the processing of negative ncode key events, because, why not?
+- Update the SWIG typemap syntax from a deprecated style to avoid warning during build.
 
 ----------
 1.6-pre (2008-07-20), not released
