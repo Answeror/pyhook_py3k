@@ -36,5 +36,5 @@ setup(name='pyHook',
       packages = ['pyHook'],
       package_dir = {'pyHook' : ""},
       ext_modules = [Extension('pyHook._cpyHook', ['cpyHook.i'], libraries=libs)],
-      data_files=[('Lib/site-packages/pyHook', ['LICENSE.txt', 'README.txt'])]
+      data_files=[('Lib/site-packages/pyHook', ['LICENSE.txt', 'README.txt','CHANGELOG.txt'])]
       )
