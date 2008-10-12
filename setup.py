@@ -24,6 +24,8 @@ doclines = __doc__.split('\n')
 
 setup(name='pyHook',
       version='1.5.1',
+      maintainer='Daniel Folkinshteyn',
+      maintainer_email='nanotube@users.sf.net',
       author='Peter Parente',
       author_email='parente@cs.unc.edu',
       url='http://pyhook.sourceforge.net',
