@@ -149,7 +149,7 @@ class HookEvent(object):
 
   @ivar Message: Keyboard or mouse event message
   @type Message: integer
-  @ivar Time: Seconds since the epoch when the even current
+  @ivar Time: Specifies the elapsed time, in milliseconds, from the time the system was started to the time the event was created (that is, placed in the thread's message queue). See the MSDN documentation for the GetMessageTime function for more detail.
   @type Time: integer
   @ivar Window: Window handle of the foreground window at the time of the event
   @type Window: integer
@@ -194,17 +194,17 @@ class MouseEvent(HookEvent):
 
 class KeyboardEvent(HookEvent):
   '''
-  Holds information about a mouse event.
+  Holds information about a keyboard event.
 
   @ivar KeyID: Virtual key code
   @type KeyID: integer
   @ivar ScanCode: Scan code
   @type ScanCode: integer
-  @ivar Ascii: ASCII value, if one exists
-  @type Ascii: string
+  @ivar Ascii: ASCII character code, if one exists
+  @type Ascii: integer
   '''
   def __init__(self, msg, vk_code, scan_code, ascii, flags, time, hwnd, window_name):
-    '''Initializes an instances of the class.'''
+    '''Initializes an instance of the class.'''
     HookEvent.__init__(self, msg, time, hwnd, window_name)
     self.KeyID = vk_code
     self.ScanCode = scan_code
