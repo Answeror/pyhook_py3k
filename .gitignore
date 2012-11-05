@@ -1,0 +1,7 @@
+*.swp
+*.un~
+*.pyc
+build/
+dist/
+cpyHook.py
+cpyHook_wrap.c

@@ -5,6 +5,10 @@
   #define _WIN32_WINNT 0x400
   #include "windows.h"
 
+  #if PY_MAJOR_VERSION >= 3
+    #define PY3K
+  #endif
+
   PyObject* callback_funcs[WH_MAX];
   HHOOK hHooks[WH_MAX];
   BYTE key_state[256];
@@ -49,6 +53,10 @@
     long pass = 1;
     PyGILState_STATE gil;
 
+#ifdef PY3K
+    PyObject *win_name_decoded = NULL;
+#endif
+
     // uncomment this next bit if you do not want to process events like "ctl-alt-del"
     // and other events that are not supposed to be processed
     // as per msdn documentation:
@@ -73,13 +81,30 @@
       GetWindowText(hwnd, win_name, win_len + 1);
     }
 
+#ifdef PY3K
+    win_name_decoded = PyUnicode_DecodeFSDefault(win_name);
+#endif
+
     // convert to an ASCII code if possible
     ascii = ConvertToASCII(kbd->vkCode, kbd->scanCode);
 
     // pass the message on to the Python function
+#ifdef PY3K
+    arglist = Py_BuildValue("(iiiiiiiu)", wParam, kbd->vkCode, kbd->scanCode, ascii,
+                            kbd->flags, kbd->time, hwnd, win_name_decoded);
+#else
     arglist = Py_BuildValue("(iiiiiiiz)", wParam, kbd->vkCode, kbd->scanCode, ascii,
                             kbd->flags, kbd->time, hwnd, win_name);
+#endif
+    if(arglist == NULL)
+      PyErr_Print();
+
     r = PyObject_CallObject(callback_funcs[WH_KEYBOARD_LL], arglist);
+
+#ifdef PY3K
+    // release unicode object
+    Py_DECREF(win_name_decoded);
+#endif
 
     // check if we should pass the event on or not
     if(r == NULL)
@@ -117,6 +142,10 @@
     long pass = 1;
     PyGILState_STATE gil;
 
+#ifdef PY3K
+    PyObject *win_name_decoded = NULL;
+#endif
+
     // get the GIL
     gil = PyGILState_Ensure();
 
@@ -131,10 +160,27 @@
       GetWindowText(hwnd, win_name, win_len + 1);
     }
 
+#ifdef PY3K
+    win_name_decoded = PyUnicode_DecodeFSDefault(win_name);
+#endif
+
     //build the argument list to the callback function
+#ifdef PY3K
+    arglist = Py_BuildValue("(iiiiiiiu)", wParam, ms->pt.x, ms->pt.y, ms->mouseData,
+                            ms->flags, ms->time, hwnd, win_name_decoded);
+#else
     arglist = Py_BuildValue("(iiiiiiiz)", wParam, ms->pt.x, ms->pt.y, ms->mouseData,
                             ms->flags, ms->time, hwnd, win_name);
+#endif
+    if(arglist == NULL)
+      PyErr_Print();
+
     r = PyObject_CallObject(callback_funcs[WH_MOUSE_LL], arglist);
+
+#ifdef PY3K
+    // release unicode object
+    Py_DECREF(win_name_decoded);
+#endif
 
     // check if we should pass the event on or not
     if(r == NULL)

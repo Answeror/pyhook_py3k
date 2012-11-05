@@ -17,7 +17,7 @@ Topic :: Software Development :: Libraries :: Python Modules
 Operating System :: Microsoft :: Windows
 """
 
-from distutils.core import setup, Extension
+from setuptools import setup, Extension
 
 libs = ['user32']
 doclines = __doc__.split('\n')
@@ -38,5 +38,6 @@ setup(name='pyHook',
       packages = ['pyHook'],
       package_dir = {'pyHook' : ""},
       ext_modules = [Extension('pyHook._cpyHook', ['cpyHook.i'], libraries=libs)],
-      data_files=[('Lib/site-packages/pyHook', ['LICENSE.txt', 'README.txt','CHANGELOG.txt'])]
+      data_files=[('Lib/site-packages/pyHook', ['LICENSE.txt', 'README.txt','CHANGELOG.txt'])],
+      use_2to3=True
       )
