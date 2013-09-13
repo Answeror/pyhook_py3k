@@ -262,8 +262,8 @@ class HookManager(object):
   @type keyboard_funcs: dictionary
   @ivar mouse_hook: Is a mouse hook set?
   @type mouse_hook: boolean
-  @ivar key_hook: Is a keyboard hook set?
-  @type key_hook: boolean
+  @ivar keyboard_hook: Is a keyboard hook set?
+  @type keyboard_hook: boolean
   '''
   def __init__(self):
     '''Initializes an instance by setting up an empty set of handlers.'''
@@ -271,7 +271,7 @@ class HookManager(object):
     self.keyboard_funcs = {}
 
     self.mouse_hook = False
-    self.key_hook = False
+    self.keyboard_hook = False
 
   def __del__(self):
     '''Unhook all registered hooks.'''
